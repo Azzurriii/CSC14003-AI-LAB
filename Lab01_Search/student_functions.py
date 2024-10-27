@@ -237,54 +237,118 @@ def Astar(matrix, start, end, pos):
 
     return visited, path  # Return the visited nodes and the reconstructed path
 
+# def beam_search(matrix, start, end, beam_width):
+#     """
+#     Beam Search algorithm:
+#     ---------------------------
+#     matrix: np array
+#         The graph's adjacency matrix.
+#     start: integer
+#         Starting node.
+#     end: integer
+#         Ending node.
+#     beam_width: integer
+#         The number of paths to keep at each level of the search.
+#
+#     Returns:
+#     ---------------------
+#     visited: dict
+#         A dictionary where keys are visited nodes and values are the node's predecessor.
+#     path: list
+#         A list that represents the shortest path from start to end.
+#     """
+#     visited = {start: None}  # Dictionary to keep track of visited nodes and their predecessors
+#     pq = []  # Initialize a heapq priority queue
+#     heapq.heappush(pq, (0, [start]))  # Push the start node with an initial cost of 0
+#
+#     while pq:
+#         current_level = []
+#
+#         # Process up to beam_width number of paths in the current level
+#         for _ in range(min(beam_width, len(pq))):
+#             cost, path = heapq.heappop(pq)  # Pop the path with the lowest cost
+#             current = path[-1]  # Get the current node (last node in the path)
+#
+#             if current == end:  # If we reached the end node, return the result
+#                 return visited, path
+#
+#             # Explore neighbors of the current node
+#             for neighbor, weight in enumerate(matrix[current]):
+#                 if weight != np.inf and neighbor not in visited:  # Check if the neighbor is reachable and unvisited
+#                     new_cost = cost + weight  # Calculate the new cost to reach the neighbor
+#                     new_path = path + [neighbor]  # Create a new path by adding the neighbor to the current path
+#                     current_level.append((new_cost, new_path))  # Add the new path to the current level
+#                     visited[neighbor] = current  # Mark the neighbor as visited and set its predecessor
+#
+#         # Sort the current level by cost and keep only the best beam_width paths
+#         current_level.sort(key=lambda x: x[0])
+#
+#         # Add the selected paths back to the priority queue
+#         for item in current_level[:beam_width]:
+#             heapq.heappush(pq, item)
+#
+#     return visited, []  # If no path is found
+
 def beam_search(matrix, start, end, beam_width):
     """
-    Beam Search algorithm:
-    ---------------------------
+    Beam Search algorithm for finding a path in a weighted graph
+
+    Parameters:
+    -----------
     matrix: np array
-        The graph's adjacency matrix.
+        The graph's adjacency matrix where 0 represents no connection
     start: integer
-        Starting node.
+        Starting node
     end: integer
-        Ending node.
+        Ending node
     beam_width: integer
-        The number of paths to keep at each level of the search.
+        The number of paths to keep at each level of the search
 
     Returns:
-    ---------------------
+    -----------
     visited: dict
-        A dictionary where keys are visited nodes and values are the node's predecessor.
+        Dictionary of visited nodes and their predecessors
     path: list
-        A list that represents the shortest path from start to end.
+        The path from start to end, empty list if no path exists
     """
-    visited = {start: None}  # Dictionary to keep track of visited nodes and their predecessors
-    pq = []  # Initialize a heapq priority queue
-    heapq.heappush(pq, (0, [start]))  # Push the start node with an initial cost of 0
+    # Initialize the priority queue with the start node
+    # Format: (cost, path)
+    pq = [(0, [start])]
+
+    # Keep track of best cost to reach each node
+    best_costs = {start: 0}
+    # Keep track of visited nodes and their predecessors
+    visited = {start: None}
 
     while pq:
-        current_level = []
+        # Get all paths at current level
+        level_paths = []
 
-        # Process up to beam_width number of paths in the current level
-        for _ in range(min(beam_width, len(pq))):
-            cost, path = heapq.heappop(pq)  # Pop the path with the lowest cost
-            current = path[-1]  # Get the current node (last node in the path)
+        # Process all paths in current level
+        while pq:
+            cost, path = heapq.heappop(pq)
+            current = path[-1]
 
-            if current == end:  # If we reached the end node, return the result
+            # If we reached the target node, update visited and return
+            if current == end:
+                # Update visited dictionary with the final path
+                for i in range(len(path) - 1):
+                    visited[path[i + 1]] = path[i]
                 return visited, path
 
-            # Explore neighbors of the current node
-            for neighbor, weight in enumerate(matrix[current]):
-                if weight != np.inf and neighbor not in visited:  # Check if the neighbor is reachable and unvisited
-                    new_cost = cost + weight  # Calculate the new cost to reach the neighbor
-                    new_path = path + [neighbor]  # Create a new path by adding the neighbor to the current path
-                    current_level.append((new_cost, new_path))  # Add the new path to the current level
-                    visited[neighbor] = current  # Mark the neighbor as visited and set its predecessor
+            # Check all possible neighbors
+            for next_node, weight in enumerate(matrix[current]):
+                if weight > 0:  # If there is a connection
+                    new_cost = cost + weight
+                    # Only consider this path if we haven't found a better way to this node
+                    if next_node not in best_costs or new_cost < best_costs[next_node]:
+                        new_path = path + [next_node]
+                        level_paths.append((new_cost, new_path))
+                        best_costs[next_node] = new_cost
+                        visited[next_node] = current
 
-        # Sort the current level by cost and keep only the best beam_width paths
-        current_level.sort(key=lambda x: x[0])
+        # Sort paths by cost and keep only the best beam_width paths
+        level_paths.sort(key=lambda x: x[0])
+        pq = level_paths[:beam_width]
 
-        # Add the selected paths back to the priority queue
-        for item in current_level[:beam_width]:
-            heapq.heappush(pq, item)
-
-    return visited, []  # If no path is found
+    return {start: None}, []  # No path found

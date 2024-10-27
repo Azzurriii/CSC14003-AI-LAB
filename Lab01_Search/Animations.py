@@ -86,7 +86,7 @@ def run(input, algorithm, delay):
     elif algorithm == 'astar':
         visited, path = Astar(matrix, start, end, pos)
     elif algorithm == 'beam':
-        visited, path = beam_search(matrix, start, end, beam_width=5)
+        visited, path = beam_search(matrix, start, end, beam_width=2)
     else:
         print("Pass a search algorithm to run program.")
 
