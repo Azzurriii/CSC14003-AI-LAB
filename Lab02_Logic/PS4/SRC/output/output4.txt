@@ -1,0 +1,14 @@
+12
+W OR Y
+W OR X
+-A OR -X
+-B OR -X
+-A OR -Y
+-B OR -Y
+-A OR -Z
+-B OR -Z
+W
+-W OR B
+-W OR A
+{}
+YES

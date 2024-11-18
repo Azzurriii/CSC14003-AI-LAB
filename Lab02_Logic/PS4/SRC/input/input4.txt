@@ -1,0 +1,10 @@
+Z
+8
+X OR Y
+-X OR W
+-Y OR W
+W OR -Z
+A OR B
+-A OR -W
+-B OR -W
+Z
